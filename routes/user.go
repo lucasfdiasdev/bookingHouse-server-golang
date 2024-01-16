@@ -15,26 +15,29 @@ func Register(ctx iris.Context) {
 	var userInput RegisterUserInput
 	if err := ctx.ReadJSON(&userInput); err != nil {
 		utils.HandleValidationErrors(err, ctx)
-		ctx.StatusCode(iris.StatusBadRequest)
 		return
 	}
 
 	var newUser models.User
 
 	if userExists, err := getAndHandleUserExists(&newUser, userInput.Email); err != nil {
-		log.Printf("Error checking user existence: %v", err)
+		utils.CreateInternalServerError(ctx)
 		ctx.StatusCode(iris.StatusInternalServerError)
 		return
 	} else if userExists {
-		log.Println("User already exists")
-		ctx.StatusCode(iris.StatusConflict)
+		utils.CreateError(
+			iris.StatusConflict,
+			"Conflict",
+			"Email already registered.",
+			ctx,
+		)
+
 		return
 	}
 
 	hashedPassword, err := hashAndSaltPassword(userInput.Password)
 	if err != nil {
-		log.Printf("Error hashing password: %v", err)
-		ctx.StatusCode(iris.StatusInternalServerError)
+		utils.CreateInternalServerError(ctx)
 		return
 	}
 

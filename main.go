@@ -4,6 +4,7 @@ import (
 	"bookingHouses-server/routes"
 	"bookingHouses-server/storage"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/joho/godotenv"
 	"github.com/kataras/iris/v12"
 )
@@ -13,6 +14,7 @@ func main() {
 	storage.InitializeDB()
 
 	app := iris.Default()
+	app.Validator = validator.New()
 
 	location := app.Party("/api/location")
 	{
